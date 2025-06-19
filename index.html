@@ -1,27 +1,154 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Senin Uchun</title>
+  <meta charset="UTF-8" />
+  <title>Qız Dostum üçün Quiz 💖</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
+      font-family: sans-serif;
       text-align: center;
-      padding-top: 100px;
+      background: #fff0f5;
+      padding: 30px;
     }
-    h1 {
-      color: #2c3e50;
+    .quiz-box {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
-    p {
-      font-size: 18px;
+    button {
+      display: block;
+      margin: 10px auto;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      background-color: #ffc0cb;
+    }
+    #score {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+    .money {
+      font-size: 40px;
+      color: green;
+      animation: pop 0.4s ease;
+    }
+    .loss {
+      font-size: 40px;
+      color: red;
+      animation: pop 0.4s ease;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
 <body>
-  <h1>Salam! Bu mənim şəxsi vebsaytımdır.</h1>
-  <p>Saytım: <strong>seninuchun.com</strong></p>
+  <div class="quiz-box">
+    <h2 id="question">Sual yüklənir...</h2>
+    <div id="answers"></div>
+    <div id="score"></div>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        question: "Əgər bir mesaj yazıb sonra silmişəmsə, niyə silmiş ola bilərəm?",
+        options: ["Hisslərimi tam ifadə edə bilmədim", "Çox hissli idi, qorxdum sənə yazmağa", "Yanlışlıqla oldu", "Yazdım, amma sənə ağırlıq vermək istəmədim"],
+        answer: 1
+      },
+      {
+        question: "Əgər səni 1 gün görməsəm, nə hiss edərəm?",
+        options: ["Heçnə olmamış kimi davranaram", "İçimdə darıxma başlayar", "Sadəcə fikir verirəm sən nə edirsən", "Həmin günü çox susaram"],
+        answer: 1
+      },
+      {
+        question: "Əgər bu saytı sənə yaratmışamsa, niyyətim nədir?",
+        options: ["Səni təəccübləndirmək", "Hisslərimi sözsüz göstərmək", "Səni əyləndirmək", "Səni daha da yaxına gətirmək"],
+        answer: 2
+      },
+      {
+        question: "Əgər mən bir şeydən inciyirəmsə, nə edərəm?",
+        options: ["Üzərini örtərəm", "İçimdə saxlayaram", "Susub reaksiya gözləyərəm", "Açıq deyərəm, amma sakit"],
+        answer: 1
+      },
+      {
+        question: "Əgər mən bir gecə yazmıramsa, səbəb nə ola bilər?",
+        options: ["Sadəcə səni izləyirəm", "Səni narahat etməmək üçün", "Özümə qapanmışam", "Üzülürəm, amma səssizəm"],
+        answer: 3
+      },
+      {
+        question: "Mən sənə nə vaxt “əslində heç demədiyim” şeyləri deyə bilərəm?",
+        options: ["Əsəbi halda", "Çox xoşbəxt olanda", "Susanda və baxışla deyəndə", "Yuxudan oyandıqdan dərhal sonra"],
+        answer: 1
+      },
+      {
+        question: "Əgər sən mənim haqqımda yanlış düşünsən, nə edərəm?",
+        options: ["Açıq deyərəm və izah edərəm", "Qırılaram və susaram", "Gözləyərəm özün anlayasan", "İçimdə saxlayaram"],
+        answer: 0
+      },
+      {
+        question: "Ən çox hansı vəziyyətdə özümü zəif hiss edirəm?",
+        options: ["Səni qırdığımda", "Deyə bilmədiyim çox şey olduğunda", "Sənin susduğun anlarda", "Məni dinləmədiyində"],
+        answer: 1
+      },
+      {
+        question: "Əgər bir gün biz uzaq olsaq, nə edərəm?",
+        options: ["Hər gün səninlə virtual əlaqə quraram", "Hər yazını hiss edərək oxuyaram", "Səninlə olan xatirələri canlandıraram", "Gözləyərəm qayıdırsan ya yox"],
+        answer: 0
+      },
+      {
+        question: "Əgər mən sənə bir gün “yaxşı bax özünə” deyərəmsə, bu nə deməkdir?",
+        options: ["Səni qorumaq istəyirəm", "Ayrılmaq istəyirəm", "Sadəcə narahatam", "Hisslərimi susub dedim"],
+        answer: 3
+      }
+    ];
+
+    let current = 0;
+    let balance = 0;
+
+    const questionEl = document.getElementById("question");
+    const answersEl = document.getElementById("answers");
+    const scoreEl = document.getElementById("score");
+
+    function loadQuestion() {
+      if (current >= quizData.length) {
+        questionEl.innerText = "Oyun bitdi!";
+        answersEl.innerHTML = "";
+        scoreEl.innerHTML = balance > 0
+          ? `<div class="money">🎉 Qazandın: +${balance}$</div>`
+          : `<div class="loss">😢 Uduzdun: ${balance}$</div>`;
+        return;
+      }
+
+      const q = quizData[current];
+      questionEl.innerText = q.question;
+      answersEl.innerHTML = "";
+
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.innerText = opt;
+        btn.onclick = () => {
+          if (i === q.answer) {
+            balance++;
+            scoreEl.innerHTML = `<div class="money">+1$</div>`;
+          } else {
+            balance--;
+            scoreEl.innerHTML = `<div class="loss">-1 çıxıldı</div>`;
+          }
+          current++;
+          setTimeout(loadQuestion, 1000);
+        };
+        answersEl.appendChild(btn);
+      });
+    }
+
+    loadQuestion();
+  </script>
 </body>
 </html>
